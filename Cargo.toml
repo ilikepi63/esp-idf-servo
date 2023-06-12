@@ -2,6 +2,11 @@
 name = "esp-idf-servo"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
+description = "A wrapper of esp-idf-sys bindings for Servo PWM control"
+repository = "https://github.com/ilikepi63/esp-idf-servo"
+readme = "README.md"
+keywords = ["esp", "esp-idf", "servo", "pwm"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
