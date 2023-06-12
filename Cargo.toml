@@ -11,4 +11,4 @@ keywords = ["esp", "esp-idf", "servo", "pwm"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-esp-idf-sys = { version = "0.33", default-features = false }
+esp-idf-sys = { version = "0.33", default-features = false, features = ["native"] }
