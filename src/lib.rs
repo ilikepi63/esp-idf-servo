@@ -73,6 +73,8 @@ impl Servo {
         esp!(unsafe { ledc_set_duty(self.config.speed_mode, self.config.channel.into(), duty) })?;
 
         esp!(unsafe { ledc_update_duty(self.config.speed_mode, self.config.channel.into()) })?;
+
+        Ok(())
     }
 }
 
