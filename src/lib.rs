@@ -4,6 +4,7 @@ use esp_idf_sys::{
     ledc_stop, ledc_timer_bit_t, ledc_timer_bit_t_LEDC_TIMER_10_BIT, ledc_timer_config,
     ledc_timer_config_t, ledc_timer_config_t__bindgen_ty_1, ledc_timer_rst, ledc_timer_t,
     ledc_update_duty,
+    EspError
 };
 
 static SERVO_LEDC_INIT_BITS: ledc_timer_bit_t = ledc_timer_bit_t_LEDC_TIMER_10_BIT;
@@ -35,7 +36,7 @@ pub struct Servo {
 }
 
 impl Servo {
-    pub fn init(config: ServoConfig) -> Self {
+    pub fn init(config: ServoConfig) -> Result<Self, EspError> {
         let ledc_timer_cfg = ledc_timer_config_t {
             clk_cfg: ledc_clk_cfg_t_LEDC_AUTO_CLK,
             __bindgen_anon_1: ledc_timer_config_t__bindgen_ty_1 {
@@ -46,7 +47,7 @@ impl Servo {
             timer_num: config.timer_number,
         };
 
-        esp!(unsafe { ledc_timer_config(&ledc_timer_cfg) }).unwrap();
+        esp!(unsafe { ledc_timer_config(&ledc_timer_cfg) })?;
 
         let ledc_ch = ledc_channel_config_t {
             intr_type: ledc_intr_type_t_LEDC_INTR_DISABLE,
@@ -63,17 +64,15 @@ impl Servo {
 
         let full_duty = (1 << SERVO_LEDC_INIT_BITS) - 1;
 
-        Servo { full_duty, config }
+        Ok(Servo { full_duty, config })
     }
 
-    pub fn write_angle(&self, angle: f64) {
+    pub fn write_angle(&self, angle: f64) -> Result<(), EspError> {
         let duty = calculate_duty(&self.config, self.full_duty, angle);
 
-        esp!(unsafe { ledc_set_duty(self.config.speed_mode, self.config.channel.into(), duty) })
-            .unwrap();
+        esp!(unsafe { ledc_set_duty(self.config.speed_mode, self.config.channel.into(), duty) })?;
 
-        esp!(unsafe { ledc_update_duty(self.config.speed_mode, self.config.channel.into()) })
-            .unwrap();
+        esp!(unsafe { ledc_update_duty(self.config.speed_mode, self.config.channel.into()) })?;
     }
 }
 
