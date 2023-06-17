@@ -1,10 +1,9 @@
 use esp_idf_sys::{
     esp, gpio_num_t, ledc_channel_config, ledc_channel_config_t, ledc_channel_t,
-    ledc_clk_cfg_t_LEDC_AUTO_CLK, ledc_intr_type_t_LEDC_INTR_DISABLE, ledc_mode_t, ledc_set_duty,
-    ledc_stop, ledc_timer_bit_t, ledc_timer_bit_t_LEDC_TIMER_10_BIT, ledc_timer_config,
-    ledc_timer_config_t, ledc_timer_config_t__bindgen_ty_1, ledc_timer_rst, ledc_timer_t,
-    ledc_update_duty,
-    EspError
+    ledc_clk_cfg_t_LEDC_AUTO_CLK, ledc_get_duty, ledc_intr_type_t_LEDC_INTR_DISABLE, ledc_mode_t,
+    ledc_set_duty, ledc_stop, ledc_timer_bit_t, ledc_timer_bit_t_LEDC_TIMER_10_BIT,
+    ledc_timer_config, ledc_timer_config_t, ledc_timer_config_t__bindgen_ty_1, ledc_timer_rst,
+    ledc_timer_t, ledc_update_duty, EspError,
 };
 
 static SERVO_LEDC_INIT_BITS: ledc_timer_bit_t = ledc_timer_bit_t_LEDC_TIMER_10_BIT;
@@ -28,6 +27,20 @@ fn calculate_duty(config: &ServoConfig, full_duty: u32, angle: f64) -> u32 {
     let duty: u32 = ((full_duty as f64) * angle_us * (config.frequency as f64) / 1000000.0) as u32;
 
     duty
+}
+
+fn calculate_angle(config: &ServoConfig, full_duty: u32, duty: u32) -> f64 {
+    let mut angle_us = (duty as f64) * 1000000.0 / (full_duty as f64) / config.frequency;
+
+    angle_us -= config.min_width_us;
+
+    if angle_us < 0.0 {
+        angule_us = 0.0;
+    }
+
+    let angle = angle_us * config.max_angle / (config.max_width_us - config.min_width_us);
+
+    angle
 }
 
 pub struct Servo {
@@ -75,6 +88,13 @@ impl Servo {
         esp!(unsafe { ledc_update_duty(self.config.speed_mode, self.config.channel.into()) })?;
 
         Ok(())
+    }
+
+    pub fn read_angle(&self) -> Result<f64, EspError> {
+        let duty: u32 =
+            esp!(unsafe { ledc_get_duty(self.config.speed_mode, self.config.channel) })?;
+
+        Ok(calculate_angle(&self.config, self.full_duty, duty))
     }
 }
 
