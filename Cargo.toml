@@ -1,8 +1,8 @@
 [package]
 name = "esp-idf-servo"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
-license = "Apache-2.0"
+license = "MIT"
 description = "A wrapper of esp-idf-sys bindings for Servo PWM control"
 repository = "https://github.com/ilikepi63/esp-idf-servo"
 readme = "README.md"
