@@ -12,14 +12,23 @@ Create a basic Servo Configuration - this one specific for the SG90 series of se
 let peripherals = Peripherals::take().unwrap();
 
 let servo_cfg = ServoConfig {
+    // below are servo specific configurations
     max_angle: 180,
     min_width_us: 500,
     max_width_us: 2500,
     frequency: 50,
-    timer_number: ledc_timer_t_LEDC_TIMER_0,
-    pin: peripherals.pins.gpio0.pin(),
-    channel: esp_idf_hal::ledc::CHANNEL0::channel(),
-    speed_mode: ledc_mode_t_LEDC_LOW_SPEED_MODE,
+    
+    // choose your timer: see https://esp-rs.github.io/esp-idf-sys/esp_idf_sys/?search=ledc_timer_t_LEDC_TIMER_0
+    timer_number: 0,
+
+    // whichever pin the servo is attached to
+    pin: 5,
+
+    // the channel number: see https://esp-rs.github.io/esp-idf-sys/esp_idf_sys/type.ledc_channel_t.html
+    channel: 0,
+
+    // the speed mode: see https://esp-rs.github.io/esp-idf-sys/esp_idf_sys/constant.ledc_mode_t_LEDC_LOW_SPEED_MODE.html
+    speed_mode: 0,
 };
 ```
 

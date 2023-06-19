@@ -1,6 +1,6 @@
 [package]
 name = "esp-idf-servo"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 license = "MIT"
 description = "A wrapper of esp-idf-sys bindings for Servo PWM control"
