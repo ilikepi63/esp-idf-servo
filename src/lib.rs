@@ -30,15 +30,15 @@ fn calculate_duty(config: &ServoConfig, full_duty: u32, angle: f64) -> u32 {
 }
 
 fn calculate_angle(config: &ServoConfig, full_duty: u32, duty: u32) -> f64 {
-    let mut angle_us = (duty as f64) * 1000000.0 / (full_duty as f64) / config.frequency;
+    let mut angle_us = (duty as f64) * 1000000.0 / (full_duty as f64) / (config.frequency as f64);
 
-    angle_us -= config.min_width_us;
+    angle_us -= config.min_width_us as f64;
 
     if angle_us < 0.0 {
-        angule_us = 0.0;
+        angle_us = 0.0;
     }
 
-    let angle = angle_us * config.max_angle / (config.max_width_us - config.min_width_us);
+    let angle = angle_us * (config.max_angle as f64) / (config.max_width_us as f64 - config.min_width_us as f64);
 
     angle
 }
@@ -91,8 +91,12 @@ impl Servo {
     }
 
     pub fn read_angle(&self) -> Result<f64, EspError> {
-        let duty: u32 =
-            esp!(unsafe { ledc_get_duty(self.config.speed_mode, self.config.channel) })?;
+
+        let mut duty: u32; 
+
+        unsafe { 
+            duty = ledc_get_duty(self.config.speed_mode, self.config.channel);
+        };
 
         Ok(calculate_angle(&self.config, self.full_duty, duty))
     }
