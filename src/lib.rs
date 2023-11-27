@@ -1,9 +1,8 @@
 use esp_idf_sys::{
-    esp, gpio_num_t, ledc_channel_config, ledc_channel_config_t, ledc_channel_t,
-    ledc_clk_cfg_t_LEDC_AUTO_CLK, ledc_get_duty, ledc_intr_type_t_LEDC_INTR_DISABLE, ledc_mode_t,
-    ledc_set_duty, ledc_stop, ledc_timer_bit_t, ledc_timer_bit_t_LEDC_TIMER_10_BIT,
-    ledc_timer_config, ledc_timer_config_t, ledc_timer_config_t__bindgen_ty_1, ledc_timer_rst,
-    ledc_timer_t, ledc_update_duty, EspError,
+    esp, EspError, gpio_num_t, ledc_channel_config, ledc_channel_config_t, ledc_channel_t,
+    ledc_get_duty, ledc_intr_type_t_LEDC_INTR_DISABLE, ledc_mode_t, ledc_set_duty, ledc_stop,
+    ledc_timer_bit_t, ledc_timer_bit_t_LEDC_TIMER_10_BIT, ledc_timer_config, ledc_timer_config_t,
+    ledc_timer_rst, ledc_timer_t, ledc_update_duty, soc_periph_ledc_clk_src_legacy_t_LEDC_AUTO_CLK,
 };
 
 static SERVO_LEDC_INIT_BITS: ledc_timer_bit_t = ledc_timer_bit_t_LEDC_TIMER_10_BIT;
@@ -38,7 +37,8 @@ fn calculate_angle(config: &ServoConfig, full_duty: u32, duty: u32) -> f64 {
         angle_us = 0.0;
     }
 
-    let angle = angle_us * (config.max_angle as f64) / (config.max_width_us as f64 - config.min_width_us as f64);
+    let angle = angle_us * (config.max_angle as f64)
+        / (config.max_width_us as f64 - config.min_width_us as f64);
 
     angle
 }
@@ -51,12 +51,10 @@ pub struct Servo {
 impl Servo {
     pub fn init(config: ServoConfig) -> Result<Self, EspError> {
         let ledc_timer_cfg = ledc_timer_config_t {
-            clk_cfg: ledc_clk_cfg_t_LEDC_AUTO_CLK,
-            __bindgen_anon_1: ledc_timer_config_t__bindgen_ty_1 {
-                duty_resolution: SERVO_LEDC_INIT_BITS,
-            },
+            clk_cfg: soc_periph_ledc_clk_src_legacy_t_LEDC_AUTO_CLK,
             freq_hz: config.frequency,
             speed_mode: config.speed_mode,
+            duty_resolution: SERVO_LEDC_INIT_BITS,
             timer_num: config.timer_number,
         };
 
@@ -91,10 +89,9 @@ impl Servo {
     }
 
     pub fn read_angle(&self) -> Result<f64, EspError> {
+        let mut duty: u32;
 
-        let mut duty: u32; 
-
-        unsafe { 
+        unsafe {
             duty = ledc_get_duty(self.config.speed_mode, self.config.channel);
         };
 
